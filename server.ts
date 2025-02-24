@@ -2,6 +2,18 @@ import compression from "compression";
 import express from "express";
 import morgan from "morgan";
 
+import { connectWithMongo } from "./server/db.server";
+
+if (
+  !process.env.NODE_ENV ||
+  (process.env.NODE_ENV !== "development" &&
+    process.env.NODE_ENV !== "production")
+) {
+  throw new Error("missing or invalid NODE_ENV");
+}
+
+connectWithMongo();
+
 // Short-circuit the type-checking of the built output.
 const BUILD_PATH = "./build/server/index.js";
 const DEVELOPMENT = process.env.NODE_ENV === "development";
@@ -41,7 +53,7 @@ if (DEVELOPMENT) {
   app.use(await import(BUILD_PATH).then((mod) => mod.app));
 }
 
-app.use(morgan("tiny"));
+app.use(morgan("dev"));
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
