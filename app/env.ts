@@ -11,6 +11,9 @@ export const env = createEnv({
     AWS_SECRET_KEY: z.string(),
     SESSION_SECRET: z.string(),
     SITE_URL: z.string(),
+    GOOGLE_CLIENT_ID: z.string(),
+    GOOGLE_CLIENT_SECRET: z.string(),
+    GOOGLE_REDIRECT_URI: z.string(),
   },
 
   /**

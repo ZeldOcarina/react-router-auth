@@ -6,17 +6,24 @@ import {
   useNavigate,
   data,
   type ActionFunction,
+  type LoaderFunction,
+  useLoaderData,
 } from "react-router";
 import { toast } from "sonner";
 import { SmallAppLogo } from "~/components/AppLogo";
 import { LoginForm } from "~/components/auth/LoginForm";
 import { AuthError, generateLoginRequest } from "~/data/auth.server";
+import { generateGoogleAuthUrl } from "~/data/google.server";
 import VerifyOTPEmail from "~/emails/monarchy-verify-otp";
 
 import { loginFormSchema, type LoginFormSchema } from "~/models/User";
 import { sendEmail } from "~/utils/sendEmail.server";
 
 export default function LoginPage() {
+  const {
+    data: { googleAuthUrl, error },
+  } = useLoaderData();
+
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const [serverErrors, setServerErrors] = useState<
@@ -30,6 +37,15 @@ export default function LoginPage() {
       action: ".",
     });
   }
+
+  useEffect(() => {
+    if (!error) return;
+    console.log(error);
+
+    setTimeout(() => {
+      toast.error("Error", { description: error });
+    }, 0);
+  }, [error]);
 
   useEffect(() => {
     console.log(fetcher.data);
@@ -62,11 +78,28 @@ export default function LoginPage() {
           <SmallAppLogo className="w-14" />
           Monarchy HIPAA Connector
         </div>
-        <LoginForm handleFormSubmit={onSubmit} serverErrors={serverErrors} />
+        <LoginForm
+          handleFormSubmit={onSubmit}
+          serverErrors={serverErrors}
+          googleAuthUrl={googleAuthUrl}
+        />
       </div>
     </div>
   );
 }
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const searchParams = new URL(request.url).searchParams;
+  const error = searchParams.get("error");
+
+  return {
+    status: 200,
+    data: {
+      googleAuthUrl: generateGoogleAuthUrl("sign-in"),
+      error,
+    },
+  };
+};
 
 export const action: ActionFunction = async ({ request }) => {
   const requestData = await request.json();

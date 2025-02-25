@@ -16,7 +16,11 @@ const monarchyEmailSchema = z
 
 export const zodUserSchema = z.object({
   email: monarchyEmailSchema,
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .optional(),
+  googleSub: z.string().optional(),
   firstName: z.string().trim().optional(),
   lastName: z.string().trim().optional(),
   isActive: z.boolean().default(true),
@@ -65,6 +69,7 @@ export interface IUser {
   activationCodeExpiration?: Date;
   createdAt: Date;
   updatedAt: Date;
+  googleSub?: string;
 }
 
 // Create a User Document type that includes Mongoose document methods
@@ -93,9 +98,9 @@ const userSchema = new Schema<UserDocument, UserModel>(
     },
     password: {
       type: String,
-      required: true,
       minlength: 6,
     },
+    googleSub: String,
     firstName: {
       type: String,
       trim: true,

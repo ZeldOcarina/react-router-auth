@@ -23,12 +23,14 @@ type SignUpFormProps = Omit<
 > & {
   onSubmit?: (data: SignUpFormSchema) => Promise<void>;
   serverErrors?: FieldErrors<SignUpFormSchema>;
+  googleAuthUrl: string;
 };
 
 export function SignUpForm({
   className,
   onSubmit,
   serverErrors,
+  googleAuthUrl,
   ...props
 }: SignUpFormProps) {
   const {
@@ -65,11 +67,6 @@ export function SignUpForm({
     }
   };
 
-  const handleGoogleLogin = () => {
-    // Implement Google login logic here
-    console.log("Google signup clicked");
-  };
-
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -83,15 +80,16 @@ export function SignUpForm({
           <form onSubmit={handleSubmit(onSubmitForm)}>
             <div className="grid gap-6">
               <div className="flex flex-col gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleGoogleLogin}
-                >
-                  <img src={googleLogo} alt="google logo" className="h-full" />
-                  Sign up with Google
-                </Button>
+                <a href={googleAuthUrl}>
+                  <Button type="button" variant="outline" className="w-full">
+                    <img
+                      src={googleLogo}
+                      alt="google logo"
+                      className="h-full"
+                    />
+                    Sign up with Google
+                  </Button>
+                </a>
               </div>
               <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
                 <span className="relative z-10 bg-background px-2 text-muted-foreground">

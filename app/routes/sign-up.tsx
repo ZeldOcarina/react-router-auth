@@ -2,9 +2,11 @@ import { GalleryVerticalEnd } from "lucide-react";
 import {
   data,
   useFetcher,
+  useLoaderData,
   useNavigate,
   useSubmit,
   type ActionFunction,
+  type LoaderFunction,
 } from "react-router";
 import { SmallAppLogo } from "~/components/AppLogo";
 import { SignUpForm } from "~/components/auth/SignUpForm";
@@ -18,8 +20,13 @@ import { signup, AuthError } from "~/data/auth.server";
 import { render } from "@react-email/render";
 import VerifyOTPEmail from "~/emails/monarchy-verify-otp";
 import { sendEmail } from "~/utils/sendEmail.server";
+import { generateGoogleAuthUrl } from "~/data/google.server";
 
 export default function SignUpPage({}: Route.ComponentProps) {
+  const {
+    data: { googleAuthUrl, error },
+  } = useLoaderData();
+
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const [serverErrors, setServerErrors] = useState<
@@ -35,7 +42,15 @@ export default function SignUpPage({}: Route.ComponentProps) {
   }
 
   useEffect(() => {
-    console.log(fetcher.data);
+    if (!error) return;
+    console.log(error);
+
+    setTimeout(() => {
+      toast.error("Error", { description: error });
+    }, 0);
+  }, [error]);
+
+  useEffect(() => {
     if (!fetcher.data) return;
 
     if (fetcher.data.status === 201) {
@@ -63,11 +78,28 @@ export default function SignUpPage({}: Route.ComponentProps) {
           <SmallAppLogo className="w-14" />
           Monarchy HIPAA Connector
         </div>
-        <SignUpForm onSubmit={onSubmit} serverErrors={serverErrors} />
+        <SignUpForm
+          onSubmit={onSubmit}
+          serverErrors={serverErrors}
+          googleAuthUrl={googleAuthUrl}
+        />
       </div>
     </div>
   );
 }
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const searchParams = new URL(request.url).searchParams;
+  const error = searchParams.get("error");
+
+  return {
+    status: 200,
+    data: {
+      googleAuthUrl: generateGoogleAuthUrl("sign-up"),
+      error,
+    },
+  };
+};
 
 export const action: ActionFunction = async ({ request }) => {
   const jsonRequest = await request.json();
