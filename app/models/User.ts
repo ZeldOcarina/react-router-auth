@@ -1,7 +1,7 @@
 import { Model, Schema, model, models, Document } from "mongoose";
 import { z } from "zod";
 
-enum UserRole {
+export enum UserRole {
   NONE = "none",
   USER = "user",
   ADMIN = "admin",
@@ -39,8 +39,19 @@ export const activateAccountFormSchema = z
   .string()
   .length(6, { message: "The otp must be six characters long" });
 
+export const frontendUserSchema = zodUserSchema
+  .extend({ id: z.string() })
+  .pick({
+    email: true,
+    firstName: true,
+    lastName: true,
+    role: true,
+    id: true,
+  });
+
 export type SignUpFormSchema = z.infer<typeof signUpFormSchema>;
 export type LoginFormSchema = z.infer<typeof loginFormSchema>;
+export type FrontendUserSchema = z.infer<typeof frontendUserSchema>;
 
 // Define the User interface with all fields
 export interface IUser {

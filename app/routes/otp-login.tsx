@@ -1,17 +1,24 @@
 import { useEffect, useState } from "react";
-import { data, useFetcher, type ActionFunction } from "react-router";
+import {
+  data,
+  useFetcher,
+  useNavigate,
+  type ActionFunction,
+} from "react-router";
 import { toast } from "sonner";
 import { SmallAppLogo } from "~/components/AppLogo";
 import { ActivateAccountForm } from "~/components/auth/ActivateAccountForm";
-import { verifyOtp } from "~/data/auth.server";
+import { createUserSession, verifyOtp } from "~/data/auth.server";
 import { activateAccountFormSchema } from "~/models/User";
 import { v4 as uuidv4 } from "uuid";
+import { authSessionStorage } from "~/sessions.server";
 
 export default function OtpLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [otp, setOtp] = useState("");
   const [fetcherKey, setFetcherKey] = useState(uuidv4());
   const fetcher = useFetcher({ key: fetcherKey });
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!fetcher.data) return;
@@ -23,6 +30,12 @@ export default function OtpLoginPage() {
 
     toast.success("success", { description: fetcher.data.data });
     setFetcherKey(uuidv4());
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        navigate("/app?index");
+      });
+    });
   }, [fetcher.data]);
 
   async function onSubmit() {
@@ -59,9 +72,6 @@ export default function OtpLoginPage() {
 export const action: ActionFunction = async ({ request }) => {
   const json = await request.json();
 
-  console.log(json);
-  debugger;
-
   const parsedOtp = activateAccountFormSchema.safeParse(String(json));
 
   if (!parsedOtp.success) {
@@ -71,11 +81,21 @@ export const action: ActionFunction = async ({ request }) => {
     );
   }
 
-  const isOtpValid = await verifyOtp(parsedOtp.data);
+  const { isOtpValid, user } = await verifyOtp(parsedOtp.data);
 
-  if (!isOtpValid) {
+  if (!isOtpValid || !user) {
     return data({ status: 401, data: "otp is invalid" });
   }
 
-  return { status: 200, data: "user successfully activated" };
+  // log the user in
+  const session = await createUserSession(user.id);
+
+  return data(
+    { status: 200, data: "login successfull" },
+    {
+      headers: {
+        "Set-Cookie": await authSessionStorage.commitSession(session),
+      },
+    }
+  );
 };

@@ -56,10 +56,15 @@ export function ActivateAccountForm({
           <CardTitle className="text-xl">
             {isLogin ? "Confirm Your Login" : "Activate Your Account"}
           </CardTitle>
-          <CardDescription>
-            {isLogin
-              ? "Login to Your Monarchy HIPAA Connector Account"
-              : "Activate your Monarchy HIPAA Connector Account"}
+          <CardDescription className="flex flex-col gap-2">
+            <p>
+              {isLogin
+                ? "Login to Your Monarchy HIPAA Connector Account"
+                : "Activate your Monarchy HIPAA Connector Account"}
+            </p>
+            <p>
+              Please enter below the activation code you received at your email.
+            </p>
           </CardDescription>
         </CardHeader>
         <CardContent>

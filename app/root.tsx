@@ -20,6 +20,8 @@ import { createCustomCookie } from "./utils/createCustomCookie.server";
 import clsx from "clsx";
 import { ModeToggle } from "~/components/ModeToggle";
 import { Toaster } from "~/components/ui/sonner";
+import { getUserFromSession, getFrontendUserById } from "./data/auth.server";
+import { UserProvider, useUser } from "./context/UserContext";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -59,12 +61,14 @@ export function ThemedLayout({ children }: { children: React.ReactNode }) {
 }
 
 export default function AppWithProviders() {
-  const data = useLoaderData<typeof loader>();
+  const { theme, user } = useLoaderData<typeof loader>();
   return (
-    <ThemeProvider specifiedTheme={data.theme} themeAction="/theme">
-      <ThemedLayout>
-        <Outlet />
-      </ThemedLayout>
+    <ThemeProvider specifiedTheme={theme} themeAction="/theme">
+      <UserProvider user={user ? user : null}>
+        <ThemedLayout>
+          <Outlet />
+        </ThemedLayout>
+      </UserProvider>
     </ThemeProvider>
   );
 }
@@ -106,8 +110,12 @@ export async function loader(args: Route.LoaderArgs) {
 
   const errorData = (await errorCookie.parse(cookieHeader)) || null;
 
+  const userId = await getUserFromSession(args.request);
+  const user = userId ? await getFrontendUserById(userId) : null;
+
   return {
     theme: getTheme(),
     errorData,
+    user,
   };
 }

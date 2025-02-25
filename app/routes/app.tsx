@@ -3,7 +3,16 @@ import Navbar from "~/layout/Navbar";
 import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
 import { AppSidebar } from "~/layout/AppSidebar";
 
-import { data, Outlet, type LoaderFunction } from "react-router";
+import {
+  data,
+  Outlet,
+  redirect,
+  useLoaderData,
+  useMatches,
+  type LoaderFunction,
+} from "react-router";
+import { getUserFromSession } from "~/data/auth.server";
+import { useUser } from "~/context/UserContext";
 
 export default function LayoutAppPage() {
   return (
@@ -25,6 +34,10 @@ export default function LayoutAppPage() {
 }
 
 export const loader: LoaderFunction = async (args) => {
+  const userId = await getUserFromSession(args.request);
+
+  if (!userId) return redirect("/sign-in");
+
   return data(
     {},
     {
