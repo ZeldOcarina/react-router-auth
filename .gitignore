@@ -3,5 +3,5 @@
 *.tsbuildinfo
 
 # React Router
-/.react-router/
+.react-router/
 /build/

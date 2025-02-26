@@ -22,9 +22,10 @@ import User, { editUserFormSchema, UserRole } from "~/models/User";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import isAllowed from "~/utils/restrictTo.server";
+import type { Route } from "../+types/root";
 
-export default function UsersPage() {
-  const { data: users } = useLoaderData<typeof loader>();
+export default function UsersPage({ loaderData }: Route.ComponentProps) {
+  //   const { data } = loaderData;
   const fetcher = useFetcher();
 
   useEffect(() => {
@@ -66,10 +67,10 @@ export default function UsersPage() {
           </h2>
         </div>
         <div className="py-4">
-          <DataTable
+          {/* <DataTable
             columns={columns({ onUserUpdate: handleUserUpdate })}
             data={users || []}
-          />
+          /> */}
         </div>
       </main>
     </>
