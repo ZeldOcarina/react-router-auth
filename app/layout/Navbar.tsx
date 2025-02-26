@@ -6,7 +6,7 @@ import { useUser } from "~/context/UserContext";
 
 export default function Navbar() {
   const user = useUser();
-  console.log(user);
+
   return (
     <nav
       className={clsx(

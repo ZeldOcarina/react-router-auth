@@ -1,6 +1,7 @@
 import { data, redirect, type LoaderFunction } from "react-router";
 import { createUserSession, signup } from "~/data/auth.server";
 import { getTokenFromCode } from "~/data/google.server";
+import { env } from "~/env";
 import User from "~/models/User";
 import { authSessionStorage } from "~/sessions.server";
 
@@ -35,7 +36,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       const error = encodeURIComponent(
         "a user with this email already exists. If it's you, please log in"
       );
-      return redirect(`/${state}?error=${error}`);
+      return redirect(`${env.APP_ROOT_URL}/${state}?error=${error}`);
     }
 
     const newUser = await User.create({
@@ -61,12 +62,12 @@ export const loader: LoaderFunction = async ({ request }) => {
       const error = encodeURIComponent(
         "a user with this google account could not be found."
       );
-      return redirect(`/${state}?error=${error}`);
+      return redirect(`${env.APP_ROOT_URL}/${state}?error=${error}`);
     }
 
     const session = await createUserSession(user.id);
 
-    return redirect("/app?index", {
+    return redirect(`${env.APP_ROOT_URL}/app?index`, {
       headers: {
         "Set-Cookie": await authSessionStorage.commitSession(session),
       },

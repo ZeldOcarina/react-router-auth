@@ -27,6 +27,16 @@ export const zodUserSchema = z.object({
   role: z.nativeEnum(UserRole).default(UserRole.NONE),
 });
 
+export const editUserFormSchema = zodUserSchema
+  .pick({
+    email: true,
+    firstName: true,
+    lastName: true,
+    role: true,
+  })
+  .partial();
+export type EditUserFormSchema = z.infer<typeof editUserFormSchema>;
+
 export const loginFormSchema = zodUserSchema.pick({
   email: true,
   password: true,
@@ -51,6 +61,7 @@ export const frontendUserSchema = zodUserSchema
     lastName: true,
     role: true,
     id: true,
+    googleSub: true,
   });
 
 export type SignUpFormSchema = z.infer<typeof signUpFormSchema>;
@@ -64,7 +75,7 @@ export interface IUser {
   firstName?: string;
   lastName?: string;
   isActive: boolean;
-  role: string;
+  role: UserRole;
   activationCode?: string;
   activationCodeExpiration?: Date;
   createdAt: Date;

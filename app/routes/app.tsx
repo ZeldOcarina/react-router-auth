@@ -11,13 +11,23 @@ import {
   useMatches,
   type LoaderFunction,
 } from "react-router";
-import { getUserFromSession } from "~/data/auth.server";
-import { useUser } from "~/context/UserContext";
+import { getFrontendUserById, getUserFromSession } from "~/data/auth.server";
+
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 export default function LayoutAppPage() {
+  const { error, user } = useLoaderData();
+
+  useEffect(() => {
+    if (!error) return;
+    setTimeout(() => {
+      toast.error("Error", { description: error });
+    }, 0);
+  }, [error]);
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar user={user} />
       <div className="flex flex-col w-full">
         <Navbar />
         <main className="flex-grow w-full h-full flex justify-center">
@@ -38,8 +48,15 @@ export const loader: LoaderFunction = async (args) => {
 
   if (!userId) return redirect("/sign-in");
 
+  const user = await getFrontendUserById(userId);
+
+  if (!user) return redirect("/sign-in");
+
+  const url = new URL(args.request.url);
+  const error = url.searchParams.get("error");
+
   return data(
-    {},
+    { error: error, user: user },
     {
       headers: {
         "Content-Security-Policy":

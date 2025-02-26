@@ -1,5 +1,6 @@
 import {
   frontendUserSchema,
+  type EditUserFormSchema,
   type FrontendUserSchema,
   type LoginFormSchema,
   type SignUpFormSchema,
@@ -67,7 +68,7 @@ export async function signup({
     throw new AuthError(422, "a user with this email already exists");
   }
 
-  const passwordHash = await hash(password, 12);
+  const passwordHash = password ? await hash(password, 12) : null;
 
   const newUser = await User.create({
     firstName,
@@ -94,7 +95,9 @@ export async function generateLoginRequest({
     );
   }
 
-  const passwordCorrect = await compare(password, existingUser.password);
+  const passwordCorrect = password
+    ? await compare(password, existingUser.password)
+    : false;
 
   if (!passwordCorrect) {
     throw new AuthError(401, "Invalid password");
@@ -157,4 +160,38 @@ export async function destroyUserSession(
   );
   const newCookie = await authSessionStorage.destroySession(session);
   return newCookie;
+}
+
+export async function getAllUsers(): Promise<FrontendUserSchema[]> {
+  const users = await User.find();
+
+  const frontendUsers = users.map((user) => {
+    return {
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      id: user.id,
+      role: user.role,
+      googleSub: user.googleSub,
+    };
+  });
+
+  const parsedFrontendUsers = frontendUsers.filter(
+    (item) => frontendUserSchema.safeParse(item).success
+  );
+
+  return parsedFrontendUsers;
+}
+
+export async function updateUser(id: string, data: EditUserFormSchema) {
+  const user = await User.findById(id);
+
+  if (!user) throw new AuthError(404, "a user with this id could not be found");
+
+  if (data.email) user.email = data.email;
+  if (data.firstName) user.firstName = data.firstName;
+  if (data.lastName) user.lastName = data.lastName;
+  if (data.role) user.role = data.role;
+
+  await user.save();
 }
