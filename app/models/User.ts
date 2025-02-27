@@ -1,4 +1,5 @@
-import { Model, Schema, model, models, Document } from "mongoose";
+import type { Model, Document } from "mongoose";
+import * as mongoose from "mongoose";
 import { z } from "zod";
 
 export enum UserRole {
@@ -6,6 +7,8 @@ export enum UserRole {
   USER = "user",
   ADMIN = "admin",
 }
+
+const { Schema, model, models } = mongoose;
 
 const monarchyEmailSchema = z
   .string()
@@ -149,8 +152,6 @@ userSchema.statics.findByEmail = function (email: string) {
 };
 
 // Create the model with proper typing
-const User =
-  (models?.User as UserModel) ||
-  model<UserDocument, UserModel>("User", userSchema);
+const User = models?.User || model<UserDocument, UserModel>("User", userSchema);
 
 export default User;

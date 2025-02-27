@@ -18,15 +18,16 @@ import { getAllUsers, updateUser } from "~/data/auth.server";
 import { DataTable } from "~/components/tables/users/DataTable";
 import { columns } from "~/components/tables/users/columns";
 import type { EditUserFormSchema } from "~/models/User";
-import User, { editUserFormSchema, UserRole } from "~/models/User";
+import { editUserFormSchema, UserRole } from "~/models/User";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import isAllowed from "~/utils/restrictTo.server";
-import type { Route } from "../+types/root";
 
-export default function UsersPage({ loaderData }: Route.ComponentProps) {
-  //   const { data } = loaderData;
+export default function UsersPage() {
+  const { data: users } = useLoaderData();
   const fetcher = useFetcher();
+
+  console.log(data);
 
   useEffect(() => {
     if (!fetcher.data) return;
@@ -67,10 +68,10 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
           </h2>
         </div>
         <div className="py-4">
-          {/* <DataTable
+          <DataTable
             columns={columns({ onUserUpdate: handleUserUpdate })}
             data={users || []}
-          /> */}
+          />
         </div>
       </main>
     </>
